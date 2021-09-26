@@ -16,7 +16,6 @@ public class Servlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     resp.setStatus(HttpServletResponse.SC_OK);
-    System.out.println("Received message!");
     resp.getWriter().write("welcome");
     resp.getWriter().flush();
     resp.getWriter().close();
