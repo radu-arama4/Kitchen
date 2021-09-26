@@ -27,7 +27,7 @@ public class Main {
     Cook gordon = new Cook(3, 3, "Gordon Romsay", "Hey, panini head, are you listening to me?");
     Cook jora = new Cook(2, 2, "Jora Jora", "Done!");
     Cook vadik = new Cook(1, 1, "Vadik Vadik", "Bruh!");
-    Cook vdovicenco = new Cook(3, 4, "Alexandru Vdovicenco", "What is programming?");
-    return new LinkedList<>(Arrays.asList(gordon, jora, vadik, vdovicenco));
+    Cook cook = new Cook(3, 4, "Cook", "Let me cook!");
+    return new LinkedList<>(Arrays.asList(gordon, jora, vadik, cook));
   }
 }
