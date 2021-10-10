@@ -1,6 +1,7 @@
 package util;
 
-import entities.Cook;
+import entities.cook.Cook;
+import entities.order.Food;
 import entities.order.Order;
 
 import java.util.Comparator;
@@ -11,8 +12,12 @@ import java.util.PriorityQueue;
 public class KitchenContext {
   private static KitchenContext instance;
 
+  private List<Food> foods = new LinkedList<>();
+
   private List<Cook> cooks = new LinkedList<>();
-  private PriorityQueue<Order> orderList = new PriorityQueue<>(20, new OrderComparator());
+  private volatile PriorityQueue<Order> orderList = new PriorityQueue<>(20, new OrderComparator());
+
+  private static int nr = 0;
 
   private KitchenContext() {}
 
@@ -23,13 +28,17 @@ public class KitchenContext {
     return instance;
   }
 
-  public void addOrder(Order order){
+  public synchronized void addOrder(Order order){
     orderList.add(order);
+  }
+
+  public synchronized void removeOrder(Order order){
+    orderList.remove(order);
   }
 
   private class OrderComparator implements Comparator<Order> {
     @Override
-    public int compare(Order o1, Order o2) {
+    public synchronized int compare(Order o1, Order o2) {
       if (o1.getPriority() > o2.getPriority()) {
         return 1;
       } else if (o2.getPriority() > o1.getPriority()) {
@@ -49,5 +58,13 @@ public class KitchenContext {
 
   public void setCooks(List<Cook> cooks) {
     this.cooks = cooks;
+  }
+
+  public List<Food> getFoods() {
+    return foods;
+  }
+
+  public void setFoods(List<Food> foods) {
+    this.foods = foods;
   }
 }
