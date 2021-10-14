@@ -12,14 +12,8 @@ import util.KitchenContext;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Getter
 @Setter
@@ -43,46 +37,69 @@ public class Cook implements Runnable {
   @SneakyThrows
   @Override
   @SuppressWarnings("InfiniteLoopStatement")
-  public synchronized void run() {
+  public void run() {
     Order foundOrder;
 
-    PriorityQueue<Order> orders = KitchenContext.getInstance().getOrderList();
+    PriorityBlockingQueue<Order> orders = KitchenContext.getInstance().getOrderList();
 
     while (true) {
       synchronized (orders) {
-        if (!orders.isEmpty()) {
-          this.notifyAll();
+        Order order = orders.take();
 
-          List<Order> result = new ArrayList<>(orders.size());
-          while (!orders.isEmpty()) {
-            result.add(orders.poll());
-          }
-
-          List<Order> syncOrders = Collections.synchronizedList(result);
-
-          synchronized (syncOrders) {
-            for (Order order : syncOrders) {
-              if (!order.isReady()) {
-                if (rank < order.getMaxComplexity()) {
-                  continue;
-                }
-                semaphore.acquire();
-                order.setReady(true);
-                foundOrder = order;
-                semaphore.release();
-
-                cook(order);
-
-                System.out.println("Sending back order with ID " + foundOrder.getId());
-                sendReadyOrder(foundOrder);
-
-                KitchenContext.getInstance().removeOrder(foundOrder);
-              }
-            }
-          }
+        if (!order.isReady() && rank < order.getMaxComplexity()) {
+          continue;
         }
+
+        semaphore.acquire();
+        order.setReady(true);
+        semaphore.release();
+
+        foundOrder = order;
+
+        cook(order);
+
+        System.out.println("Sending back order with ID " + foundOrder.getId());
+        sendReadyOrder(foundOrder);
+
+        KitchenContext.getInstance().removeOrder(foundOrder);
       }
     }
+
+    //    while (true) {
+    //      synchronized (orders) {
+    //        if (!orders.isEmpty()) {
+    //          this.notifyAll();
+    //
+    //          List<Order> result = new ArrayList<>(orders.size());
+    //          while (!orders.isEmpty()) {
+    //            result.add(orders.poll());
+    //          }
+    //
+    //          List<Order> syncOrders = Collections.synchronizedList(result);
+    //
+    //          synchronized (syncOrders) {
+    //            for (Order order : syncOrders) {
+    //              if (!order.isReady()) {
+    //                if (rank < order.getMaxComplexity()) {
+    //                  continue;
+    //                }
+    //                semaphore.acquire();
+    //                order.setReady(true);
+    //                foundOrder = order;
+    //                semaphore.release();
+    //
+    //                cook(order);
+    //
+    //                System.out.println("Sending back order with ID " + foundOrder.getId());
+    //                sendReadyOrder(foundOrder);
+    //
+    //                KitchenContext.getInstance().removeOrder(foundOrder);
+    //              }
+    //            }
+    //          }
+    //        }
+    //      }
+    //    }
   }
 
   private synchronized void cook(Order order) throws InterruptedException {

@@ -7,7 +7,7 @@ import entities.order.Order;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class KitchenContext {
   private static KitchenContext instance;
@@ -15,7 +15,8 @@ public class KitchenContext {
   private List<Food> foods = new LinkedList<>();
 
   private List<Cook> cooks = new LinkedList<>();
-  private volatile PriorityQueue<Order> orderList = new PriorityQueue<>(20, new OrderComparator());
+
+  private volatile PriorityBlockingQueue<Order> orderList = new PriorityBlockingQueue<>(20, new OrderComparator());
 
   private static int nr = 0;
 
@@ -48,7 +49,7 @@ public class KitchenContext {
     }
   }
 
-  public PriorityQueue<Order> getOrderList() {
+  public PriorityBlockingQueue<Order> getOrderList() {
     return orderList;
   }
 
