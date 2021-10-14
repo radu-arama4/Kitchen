@@ -1,6 +1,5 @@
 package entities.cook;
 
-import com.google.gson.Gson;
 import entities.order.Food;
 import entities.order.Order;
 import lombok.Getter;
@@ -9,11 +8,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import util.KitchenContext;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.concurrent.*;
+
+import static tomcat.Request.sendReadyOrderToDinningHall;
 
 @Getter
 @Setter
@@ -59,47 +57,11 @@ public class Cook implements Runnable {
         cook(order);
 
         System.out.println("Sending back order with ID " + foundOrder.getId());
-        sendReadyOrder(foundOrder);
+        sendReadyOrderToDinningHall(foundOrder);
 
         KitchenContext.getInstance().removeOrder(foundOrder);
       }
     }
-
-    //    while (true) {
-    //      synchronized (orders) {
-    //        if (!orders.isEmpty()) {
-    //          this.notifyAll();
-    //
-    //          List<Order> result = new ArrayList<>(orders.size());
-    //          while (!orders.isEmpty()) {
-    //            result.add(orders.poll());
-    //          }
-    //
-    //          List<Order> syncOrders = Collections.synchronizedList(result);
-    //
-    //          synchronized (syncOrders) {
-    //            for (Order order : syncOrders) {
-    //              if (!order.isReady()) {
-    //                if (rank < order.getMaxComplexity()) {
-    //                  continue;
-    //                }
-    //                semaphore.acquire();
-    //                order.setReady(true);
-    //                foundOrder = order;
-    //                semaphore.release();
-    //
-    //                cook(order);
-    //
-    //                System.out.println("Sending back order with ID " + foundOrder.getId());
-    //                sendReadyOrder(foundOrder);
-    //
-    //                KitchenContext.getInstance().removeOrder(foundOrder);
-    //              }
-    //            }
-    //          }
-    //        }
-    //      }
-    //    }
   }
 
   private synchronized void cook(Order order) throws InterruptedException {
@@ -122,46 +84,5 @@ public class Cook implements Runnable {
     executorService.awaitTermination((long) order.getMaxWait(), TimeUnit.MILLISECONDS);
 
     System.out.println(catchPhrase);
-  }
-
-  private synchronized void sendReadyOrder(Order order) {
-    HttpURLConnection con = null;
-    // host.docker.internal
-    try {
-      URL url = new URL("http://localhost:8080/home");
-      con = (HttpURLConnection) url.openConnection();
-      con.setRequestMethod("POST");
-    } catch (IOException e) {
-      log.error(e.getMessage());
-    }
-    con.setRequestProperty("Content-Type", "application/json; utf-8");
-    con.setRequestProperty("Accept", "application/json");
-
-    con.setDoOutput(true);
-
-    Gson gson = new Gson();
-
-    String json = gson.toJson(order);
-
-    try (OutputStream os = con.getOutputStream()) {
-      byte[] input = json.getBytes("utf-8");
-      os.write(input, 0, input.length);
-    } catch (IOException e) {
-      log.error(e.getMessage());
-    }
-
-    try (BufferedReader br =
-        new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"))) {
-      StringBuilder response = new StringBuilder();
-      String responseLine = null;
-      while ((responseLine = br.readLine()) != null) {
-        response.append(responseLine.trim());
-      }
-      System.out.println(response.toString());
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 }
