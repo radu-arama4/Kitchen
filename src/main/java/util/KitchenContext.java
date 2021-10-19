@@ -56,6 +56,15 @@ public class KitchenContext {
     }
   }
 
+  public Food findItemById(int id) {
+    for (Food food : foods) {
+      if (food.getId() == id) {
+        return food;
+      }
+    }
+    return null;
+  }
+
   public Apparatus findFreeApparatus(CookingApparatus apparatus) {
     Apparatus foundApparatus = null;
     synchronized (availableApparatus) {

@@ -20,13 +20,13 @@ public class Servlet extends HttpServlet {
   }
 
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-      throws IOException {
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     String payloadRequest = JsonUtil.getBody(req);
 
     Gson gson = new Gson();
 
     Order receivedOrder = gson.fromJson(payloadRequest, Order.class);
+    receivedOrder.initialize();
 
     KitchenContext.getInstance().addOrder(receivedOrder);
 

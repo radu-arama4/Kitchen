@@ -3,6 +3,7 @@ package entities.order;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import util.KitchenContext;
 
 import java.sql.Timestamp;
@@ -15,6 +16,8 @@ import java.util.List;
 public class Order {
   private int id;
   private List<Integer> items;
+  private boolean[] itemsDone;
+  private boolean[] itemsUsed;
   private int priority;
   private float maxWait;
   private boolean ready;
@@ -26,6 +29,17 @@ public class Order {
     this.id = id;
     this.items = items;
     this.priority = priority;
+  }
+
+  public void initialize() {
+    itemsDone = new boolean[items.size()];
+    itemsUsed = new boolean[items.size()];
+    for (Boolean item : itemsDone) {
+      item = false;
+    }
+    for (Boolean item : itemsUsed) {
+      item = false;
+    }
   }
 
   public List<Food> getFoodsByItemId() {
@@ -40,6 +54,27 @@ public class Order {
         });
 
     return returnedFoods;
+  }
+
+  @SneakyThrows
+  public void setItemDone(Food item) {
+    for (int itm : items) {
+      if (itm == item.getId()) {
+        itemsDone[items.indexOf(itm)] = true;
+      }
+    }
+  }
+
+  @SneakyThrows
+  public Food getUndoneItem() {
+    for (int item : items) {
+      int indx = items.indexOf(item);
+      if (!itemsDone[indx] && !itemsUsed[indx]) {
+        itemsUsed[indx] = true;
+        return KitchenContext.getInstance().findItemById(item);
+      }
+    }
+    return null;
   }
 
   public int getMaxComplexity() {
