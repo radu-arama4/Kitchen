@@ -1,15 +1,17 @@
 package util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.LifecycleException;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import tomcat.TomcatManager;
 
-@Slf4j
 public class ApplicationManager {
+  private static final Logger log = LogManager.getLogger(ApplicationManager.class);
   private static TomcatManager tomcatManager = new TomcatManager();
 
   public static void startApplication() {
     Thread serverThread = new Thread(tomcatManager);
+    Properties.readProperties();
     serverThread.start();
   }
 

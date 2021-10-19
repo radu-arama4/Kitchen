@@ -2,19 +2,21 @@ package tomcat;
 
 import com.google.gson.Gson;
 import entities.order.Order;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-@Slf4j
 public class Request {
-  public synchronized static void sendReadyOrderToDinningHall(Order order) {
+  private static final Logger log = LogManager.getLogger(Request.class);
+
+  public static synchronized void sendReadyOrderToDinningHall(Order order) {
     HttpURLConnection con = null;
     // host.docker.internal
     try {
-      URL url = new URL("http://host.docker.internal:8080/home");
+      URL url = new URL("http://localhost:8080/home");
       con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
     } catch (IOException e) {

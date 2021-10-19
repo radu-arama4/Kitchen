@@ -1,7 +1,11 @@
 import entities.cook.Cook;
+import entities.cooking.apparatus.Apparatus;
+import entities.cooking.apparatus.Oven;
+import entities.cooking.apparatus.Stove;
 import entities.order.Food;
 import util.ApplicationManager;
 import util.KitchenContext;
+import util.Properties;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -16,9 +20,10 @@ public class Main {
 
     KitchenContext kitchenContext = KitchenContext.getInstance();
 
-    List<Cook> cooks = generateCooks();
+    List<Cook> cooks = generateCooks(Properties.NR_OF_COOKS);
     kitchenContext.setCooks(cooks);
     kitchenContext.setFoods(generateFood());
+    kitchenContext.setAvailableApparatus(generateApparatus(Properties.NR_OF_STOVE, Properties.NR_OF_OVEN));
 
     for (Cook cook : cooks) {
       Thread thread = new Thread(cook);
@@ -28,7 +33,7 @@ public class Main {
     // ApplicationManager.closeApplication();
   }
 
-  private static List<Cook> generateCooks() {
+  private static List<Cook> generateCooks(int nrOfCooks) {
     Cook gordon =
         new Cook(3, 3, "Gordon Romsay", "Hey, panini head, are you listening to me?", semaphore);
     Cook jora = new Cook(2, 2, "Jora Jora", "Done!", semaphore);
@@ -63,5 +68,19 @@ public class Main {
             lasagna,
             burger,
             gyros));
+  }
+
+  public static List<Apparatus> generateApparatus(int nrOfStoves, int nrOfOvens) {
+    List<Apparatus> generatedApparatus = new LinkedList<>();
+
+    for (int i = 0; i < nrOfOvens; i++) {
+      generatedApparatus.add(new Oven());
+    }
+
+    for (int i = 0; i < nrOfStoves; i++) {
+      generatedApparatus.add(new Stove());
+    }
+
+    return generatedApparatus;
   }
 }
